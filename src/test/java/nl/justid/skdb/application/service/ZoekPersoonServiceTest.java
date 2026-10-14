@@ -7,6 +7,7 @@ import nl.justid.skdb.infrastructure.persistence.inmemory.InMemoryPersoonReposit
 import nl.justid.skdb.domain.model.Strafrechtketennummer;
 import nl.justid.skdb.domain.model.Burgerservicenummer;
 import nl.justid.skdb.domain.model.NatuurlijkPersoon;
+import nl.justid.skdb.domain.exception.PersoonNietGevondenException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -45,12 +46,16 @@ class ZoekPersoonServiceTest {
     @Test 
     @DisplayName("Moet exception gooien bij zoeken naar niet bestaand NatuurlijkPersoon op Strafrechtketennummer.")
     void shouldThrowPersoonNietGevondenExceptionSkn() {
-
+        assertThatThrownBy(() -> {
+            zoekPersoonService.findBySkn(skn);
+        }).isInstanceOf(PersoonNietGevondenException.class);
     }
 
     @Test 
     @DisplayName("Moet PersoonNietGevondenException gooien bij zoeken naar niet bestaand NatuurlijkPersoon op Burgerservicenummer.")
     void shouldThrowPersoonNietGevondenExceptionBsn() {
-
+        assertThatThrownBy(() -> {
+            zoekPersoonService.findByBsn(bsn);
+        }).isInstanceOf(PersoonNietGevondenException.class);
     }
 }
