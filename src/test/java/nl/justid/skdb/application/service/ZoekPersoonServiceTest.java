@@ -9,6 +9,7 @@ import nl.justid.skdb.domain.model.Burgerservicenummer;
 import nl.justid.skdb.domain.model.NatuurlijkPersoon;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Optional;
 
@@ -44,7 +45,7 @@ class ZoekPersoonServiceTest {
     @Test 
     @DisplayName("Moet exception gooien bij zoeken naar niet bestaand NatuurlijkPersoon op Strafrechtketennummer.")
     void shouldThrowPersoonNietGevondenExceptionSkn() {
-        
+
     }
 
     @Test 
