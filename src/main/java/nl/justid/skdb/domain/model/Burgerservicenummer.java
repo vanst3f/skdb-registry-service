@@ -17,7 +17,7 @@ public record Burgerservicenummer(String value) {
         }
         num += Character.getNumericValue(value.charAt(8)) * -1;
 
-        if (!(num > 0) && !(num % 11 == 0)) {
+        if (!(num > 0) || !(num % 11 == 0)) {
             throw new IllegalArgumentException("Waarde niet geslaagd voor 11-proef.");
         }
     }

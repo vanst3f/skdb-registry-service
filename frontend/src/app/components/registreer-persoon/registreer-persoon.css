@@ -1,0 +1,8 @@
+#skn-error-message,
+#bsn-error-message {
+  color: red;
+}
+
+#success-message {
+  color: green;
+}

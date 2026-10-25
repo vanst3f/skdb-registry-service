@@ -54,7 +54,7 @@ class StrafzaakTest {
     @DisplayName("Strafzaak mag niet gecreëerd worden zonder parketnummer.")
     void shouldThrowIfParketnumIsNull() {
         assertThatThrownBy(() -> {
-            final Strafzaak strafzaak = new Strafzaak(null, verdachteSkn);
+            new Strafzaak(null, verdachteSkn);
         }).isInstanceOf(NullPointerException.class);
     }
 
@@ -62,7 +62,7 @@ class StrafzaakTest {
     @DisplayName("Strafzaak mag niet gecreëerd worden zonder strafrechtketennummer.")
     void shouldThrowIfSknIsNull() {
         assertThatThrownBy(() -> {
-            final Strafzaak strafzaak = new Strafzaak(parketnummer, null);
+            new Strafzaak(parketnummer, null);
         }).isInstanceOf(NullPointerException.class);
     }
 

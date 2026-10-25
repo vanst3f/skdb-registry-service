@@ -3,6 +3,7 @@ package nl.justid.skdb.infrastructure.web;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ import nl.justid.skdb.domain.exception.PersoonNietGevondenException;
 
 @RestController
 @RequestMapping("/api/personen")
+@CrossOrigin("http://localhost:4200")
 public class PersoonController {
     private final RegistreerPersoonService registreerPersoonService;
     private final ZoekPersoonService zoekPersoonService;
@@ -32,6 +34,15 @@ public class PersoonController {
     public PersoonController(RegistreerPersoonService registreerPersoonService, ZoekPersoonService zoekPersoonService) {
         this.registreerPersoonService = registreerPersoonService;
         this.zoekPersoonService = zoekPersoonService;
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public void POST(@Valid @RequestBody RegistreerPersoonRequest request) {
+        final Strafrechtketennummer strafrechtketennummer = new Strafrechtketennummer(request.skn());
+        final Burgerservicenummer burgerservicenummer = new Burgerservicenummer(request.bsn());
+
+        registreerPersoonService.registreer(strafrechtketennummer, burgerservicenummer);
     }
 
     @GetMapping("{skn}")
@@ -50,15 +61,6 @@ public class PersoonController {
         final NatuurlijkPersoon persoon = zoekPersoonService.findByBsn(burgerservicenummer).orElseThrow(() -> new PersoonNietGevondenException(burgerservicenummer));
 
         return new ZoekPersoonResponse(persoon);
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public void POST(@Valid @RequestBody RegistreerPersoonRequest request) {
-        final Strafrechtketennummer strafrechtketennummer = new Strafrechtketennummer(request.skn());
-        final Burgerservicenummer burgerservicenummer = new Burgerservicenummer(request.bsn());
-
-        registreerPersoonService.registreer(strafrechtketennummer, burgerservicenummer);
     }
 
     @ExceptionHandler

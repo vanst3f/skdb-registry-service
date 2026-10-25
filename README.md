@@ -42,3 +42,19 @@ De mapper (in dit geval PersoonMapper) is er om een entiteit vanuit het domein, 
 ## 5. Technologieën en tools
 
 ## 6. Hoe draai je en test je het zelf?
+
+### Vereisten (Prerequisites)
+
+Voer uit: "npm install" in /frontend
+
+Je moet voor het draaien van het project Docker, Node v22.22.2 en minimaal Java 21 hebben
+
+### Hoe draai je de backend en frontend?
+
+De backend draai je door middel van "./mvnw spring-boot:test-run" (Testcontainer) uit te voeren in de root en de frontend draai je door middel van "npm start" uit te voeren in /frontend
+
+De backend draait op localhost:8080 en de frontend draait op localhost:4200
+
+### Testen
+
+De backend wordt getest door middel van "./mvnw test" uit te voeren in de root en de frontend wordt getest door middel van "npm run test:ci" uit te voeren in /frontend
