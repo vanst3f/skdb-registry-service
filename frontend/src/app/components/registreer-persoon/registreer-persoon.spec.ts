@@ -1,7 +1,8 @@
-import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { throwError, Subject } from "rxjs";
 
 import { RegistreerPersoon } from "./registreer-persoon";
-import { PersoonService } from "../../services/persoon.service";
+import { ErrorDetails, PersoonService } from "../../services/persoon.service";
 import { PersoonServiceMock } from "../../services/testing/persoon.service.mock";
 
 describe("RegistreerPersoon", () => {
@@ -20,6 +21,11 @@ describe("RegistreerPersoon", () => {
     await fixture.whenStable();
 
     serviceMock = TestBed.inject(PersoonService) as any;
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("should create", () => {
@@ -132,5 +138,87 @@ describe("RegistreerPersoon", () => {
     expect(component.bsnControl.invalid).toBe(true);
     expect(errorText).not.toBeNull();
     expect(errorText.textContent).toContain("Ongeldige invoer voor burgerservicenummer.");
+  });
+
+  it("Als de gebruiker een persoon probeert te registreren met al bestaande skn dan krijgt de gebruiker een bijpassende melding te zien.", () => {
+    const form = fixture.nativeElement.querySelector("form") as HTMLFormElement;
+    const sknInput = fixture.nativeElement.querySelector("input[name='skn']") as HTMLInputElement;
+    const bsnInput = fixture.nativeElement.querySelector("input[name='bsn']") as HTMLInputElement;
+    let errorText = fixture.nativeElement.querySelector("#skn-error-message");
+    sknInput.value = "SKN-2026-123456";
+    bsnInput.value = "111111110";
+    const mockError: ErrorDetails = {
+      isNetworkError: false,
+      message: `Strafrechtketennummer ${sknInput.value} bestaat al.`,
+      statusCode: 409,
+      key: "skn-already-exists",
+    };
+    serviceMock.registreer.mockReturnValueOnce(throwError(() => mockError));
+    expect(errorText).toBeNull();
+
+    sknInput.dispatchEvent(new Event("input"));
+    bsnInput.dispatchEvent(new Event("input"));
+    form.dispatchEvent(new SubmitEvent("submit"));
+    fixture.detectChanges();
+    errorText = fixture.nativeElement.querySelector("#skn-error-message");
+
+    expect(component.apiError?.key).toEqual("skn-already-exists");
+    expect(errorText).not.toBeNull();
+    expect(errorText.textContent).toContain("Strafrechtketennummer SKN-2026-123456 bestaat al.");
+  });
+
+  it("Als de gebruiker een persoon probeert te registreren met al bestaande bsn dan krijgt de gebruiker een bijpassende melding te zien.", () => {
+    const form = fixture.nativeElement.querySelector("form") as HTMLFormElement;
+    const sknInput = fixture.nativeElement.querySelector("input[name='skn']") as HTMLInputElement;
+    const bsnInput = fixture.nativeElement.querySelector("input[name='bsn']") as HTMLInputElement;
+    let errorText = fixture.nativeElement.querySelector("#bsn-error-message");
+    sknInput.value = "SKN-2026-123456";
+    bsnInput.value = "111111110";
+    const mockError: ErrorDetails = {
+      isNetworkError: false,
+      message: `Burgerservicenummer ${bsnInput.value} bestaat al.`,
+      statusCode: 409,
+      key: "bsn-already-exists",
+    };
+    serviceMock.registreer.mockReturnValueOnce(throwError(() => mockError));
+    expect(errorText).toBeNull();
+
+    sknInput.dispatchEvent(new Event("input"));
+    bsnInput.dispatchEvent(new Event("input"));
+    form.dispatchEvent(new SubmitEvent("submit"));
+    fixture.detectChanges();
+    errorText = fixture.nativeElement.querySelector("#bsn-error-message");
+
+    expect(component.apiError?.key).toEqual("bsn-already-exists");
+    expect(errorText).not.toBeNull();
+    expect(errorText.textContent).toContain("Burgerservicenummer 111111110 bestaat al.");
+  });
+
+  it("Als de gebruiker het formulier probeert te verzenden tijdens dat er nog een verzoek bezig is, moet dat worden tegengehouden.", () => {
+    const openStream = new Subject<any>();
+    const mockEvent = new Event("submit");
+    serviceMock.registreer.mockReturnValueOnce(openStream);
+    component.registreerPersoonForm.setValue({ skn: "SKN-2026-123456", bsn: "123456782" });
+
+    component.submit(mockEvent);
+    expect(component.isRegistering).toBe(true);
+    component.submit(mockEvent);
+    openStream.next({});
+    openStream.complete();
+
+    expect(component["service"].registreer).toHaveBeenCalledTimes(1);
+    expect(component.isRegistering).toBe(false);
+  });
+
+  it("Als de gebruiker na het versturen snel wegnavigeert, moet de stream worden afgebroken.", () => {
+    const openStream = new Subject<any>();
+    serviceMock.registreer.mockReturnValueOnce(openStream);
+    component.registreerPersoonForm.setValue({ skn: "SKN-2026-123456", bsn: "123456782" });
+
+    component.submit(new Event("submit"));
+    expect(openStream.observed).toBe(true);
+    fixture.destroy();
+
+    expect(openStream.observed).toBe(false);
   });
 });

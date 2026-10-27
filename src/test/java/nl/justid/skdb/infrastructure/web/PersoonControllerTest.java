@@ -20,14 +20,15 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.api.DisplayName;
 
 import nl.justid.skdb.domain.model.Strafrechtketennummer;
+import nl.justid.skdb.infrastructure.web.persoon.PersoonController;
 import nl.justid.skdb.domain.model.Burgerservicenummer;
 import nl.justid.skdb.domain.model.NatuurlijkPersoon;
 import nl.justid.skdb.domain.exception.SknBestaatAlException;
 import nl.justid.skdb.domain.exception.BsnBestaatAlException;
+import nl.justid.skdb.domain.exception.PersoonNietGevondenException;
 import nl.justid.skdb.application.service.RegistreerPersoonService;
 import nl.justid.skdb.application.service.ZoekPersoonService;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 @WebMvcTest(PersoonController.class)
@@ -64,7 +65,7 @@ public class PersoonControllerTest {
     @DisplayName("Moet HTTP-statuscode 200 en NatuurlijkPersoon teruggeven wanneer die wordt gevonden op Strafrechtketennummer.")
     void shouldReturnNatuurlijkPersoonOnFindBySkn() throws Exception {
         NatuurlijkPersoon persoon = new NatuurlijkPersoon(skn, bsn);
-        Mockito.when(zoekPersoonService.findBySkn(skn)).thenReturn(Optional.of(persoon));
+        Mockito.when(zoekPersoonService.findBySkn(skn)).thenReturn(persoon);
 
         mockMvc.perform(get("/api/personen/{skn}", skn.value())).andExpect(status().isOk()).andExpect(jsonPath("$.skn").value(skn.value())).andExpect(jsonPath("$.bsn").value(bsn.value()));
     }
@@ -73,7 +74,7 @@ public class PersoonControllerTest {
     @DisplayName("Moet HTTP-statuscode 200 en NatuurlijkPersoon teruggeven wanneer die wordt gevonden op Burgerservicenummer.")
     void shouldReturnNatuurlijkPersoonOnFindByBsn() throws Exception {
         NatuurlijkPersoon persoon = new NatuurlijkPersoon(skn, bsn);
-        Mockito.when(zoekPersoonService.findByBsn(bsn)).thenReturn(Optional.of(persoon));
+        Mockito.when(zoekPersoonService.findByBsn(bsn)).thenReturn(persoon);
 
         mockMvc.perform(get("/api/personen?bsn={bsn}", bsn.value())).andExpect(status().isOk()).andExpect(jsonPath("$.skn").value(skn.value())).andExpect(jsonPath("$.bsn").value(bsn.value()));
     }
@@ -156,7 +157,7 @@ public class PersoonControllerTest {
         @Test
     @DisplayName("Moet HTTP-statuscode 404 teruggeven bij zoeken op niet bestaand NatuurlijkPersoon met Strafrechtketennummer (PersoonNietGevondenException)")
     void shouldReturn404WhenNatuurlijkPersoonDoesNotExistSkn() throws Exception {
-        Mockito.when(zoekPersoonService.findBySkn(skn)).thenReturn(Optional.empty());
+        Mockito.when(zoekPersoonService.findBySkn(skn)).thenThrow(new PersoonNietGevondenException(skn));
 
         mockMvc.perform(get("/api/personen/{skn}", skn.value())).andExpect(status().isNotFound());
     }
@@ -164,7 +165,7 @@ public class PersoonControllerTest {
     @Test
     @DisplayName("Moet HTTP-statuscode 404 teruggeven bij zoeken op niet bestaand NatuurlijkPersoon met Burgerservicenummer (PersoonNietGevondenException)")
     void shouldReturn404WhenNatuurlijkPersoonDoesNotExistBsn() throws Exception {
-        Mockito.when(zoekPersoonService.findByBsn(bsn)).thenReturn(Optional.empty());
+        Mockito.when(zoekPersoonService.findByBsn(bsn)).thenThrow(new PersoonNietGevondenException(bsn));
 
         mockMvc.perform(get("/api/personen?bsn={bsn}", bsn.value())).andExpect(status().isNotFound());
     }

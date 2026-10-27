@@ -11,6 +11,9 @@
   @if (sknControl.invalid && sknControl.touched) {
     <p id="skn-error-message">Ongeldige invoer voor strafrechtketennummer.</p>
   }
+  @if (apiError?.key === "skn-already-exists") {
+    <p id="skn-error-message">{{ apiError ? apiError.message : "" }}</p>
+  }
 
   <label for="bsn">Burgerservicenummer:</label>
   <input
@@ -24,10 +27,18 @@
   @if (bsnControl.invalid && bsnControl.touched) {
     <p id="bsn-error-message">Ongeldige invoer voor burgerservicenummer.</p>
   }
+  @if (apiError?.key === "bsn-already-exists") {
+    <p id="bsn-error-message">{{ apiError ? apiError.message : "" }}</p>
+  }
 
-  <button type="submit" [disabled]="registreerPersoonForm.invalid">Verstuur</button>
+  <button type="submit" [disabled]="registreerPersoonForm.invalid || isRegistering">
+    Verstuur
+  </button>
 
   @if (isSent) {
-    <div class="success-message">Persoon succesvol geregistreerd!</div>
+    <p class="success-message">Persoon succesvol geregistreerd!</p>
+  }
+  @if (apiError?.statusCode === 0 || apiError?.statusCode === 500) {
+    <p class="general-error-message">{{ apiError ? apiError.message : "" }}</p>
   }
 </form>
