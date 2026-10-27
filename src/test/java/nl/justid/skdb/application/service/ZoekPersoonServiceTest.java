@@ -12,8 +12,6 @@ import nl.justid.skdb.domain.exception.PersoonNietGevondenException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.Optional;
-
 class ZoekPersoonServiceTest {
     private InMemoryPersoonRepository repository = new InMemoryPersoonRepository();
     private ZoekPersoonService zoekPersoonService = new ZoekPersoonService(repository);
@@ -27,9 +25,9 @@ class ZoekPersoonServiceTest {
         NatuurlijkPersoon persoon = new NatuurlijkPersoon(skn, bsn);
         repository.save(persoon);
 
-        Optional<NatuurlijkPersoon> result = zoekPersoonService.findBySkn(skn);
+        NatuurlijkPersoon result = zoekPersoonService.findBySkn(skn);
 
-        assertThat(result).isEqualTo(Optional.of(persoon));
+        assertThat(result).isEqualTo(persoon);
     }
 
     @Test
@@ -38,9 +36,9 @@ class ZoekPersoonServiceTest {
         NatuurlijkPersoon persoon = new NatuurlijkPersoon(skn, bsn);
         repository.save(persoon);
 
-        Optional<NatuurlijkPersoon> result = zoekPersoonService.findByBsn(bsn);
+        NatuurlijkPersoon result = zoekPersoonService.findByBsn(bsn);
 
-        assertThat(result).isEqualTo(Optional.of(persoon));
+        assertThat(result).isEqualTo(persoon);
     }
 
     @Test 

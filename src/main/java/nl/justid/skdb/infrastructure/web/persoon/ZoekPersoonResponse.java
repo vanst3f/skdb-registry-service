@@ -1,4 +1,4 @@
-package nl.justid.skdb.infrastructure.web;
+package nl.justid.skdb.infrastructure.web.persoon;
 
 import nl.justid.skdb.domain.model.NatuurlijkPersoon;
 

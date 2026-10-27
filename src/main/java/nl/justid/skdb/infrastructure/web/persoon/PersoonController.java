@@ -1,9 +1,9 @@
-package nl.justid.skdb.infrastructure.web;
+package nl.justid.skdb.infrastructure.web.persoon;
 
 import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,12 +19,10 @@ import nl.justid.skdb.application.service.ZoekPersoonService;
 import nl.justid.skdb.domain.model.Strafrechtketennummer;
 import nl.justid.skdb.domain.model.Burgerservicenummer;
 import nl.justid.skdb.domain.model.NatuurlijkPersoon;
-import nl.justid.skdb.domain.exception.SknBestaatAlException;
-import nl.justid.skdb.domain.exception.BsnBestaatAlException;
-import nl.justid.skdb.domain.exception.PersoonNietGevondenException;
 
 @RestController
 @RequestMapping("/api/personen")
+@CrossOrigin("http://localhost:4200")
 public class PersoonController {
     private final RegistreerPersoonService registreerPersoonService;
     private final ZoekPersoonService zoekPersoonService;
@@ -34,11 +32,21 @@ public class PersoonController {
         this.zoekPersoonService = zoekPersoonService;
     }
 
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public RegistreerPersoonResponse POST(@Valid @RequestBody RegistreerPersoonRequest request) {
+        final Strafrechtketennummer strafrechtketennummer = new Strafrechtketennummer(request.skn());
+        final Burgerservicenummer burgerservicenummer = new Burgerservicenummer(request.bsn());
+        final NatuurlijkPersoon persoon = registreerPersoonService.registreer(strafrechtketennummer, burgerservicenummer);
+
+        return new RegistreerPersoonResponse(persoon);
+    }
+
     @GetMapping("{skn}")
     @ResponseStatus(HttpStatus.OK)
     public ZoekPersoonResponse getBySkn(@PathVariable String skn) {
         final Strafrechtketennummer strafrechtketennummer = new Strafrechtketennummer(skn);
-        final NatuurlijkPersoon persoon = zoekPersoonService.findBySkn(strafrechtketennummer).orElseThrow(() -> new PersoonNietGevondenException(strafrechtketennummer));
+        final NatuurlijkPersoon persoon = zoekPersoonService.findBySkn(strafrechtketennummer);
 
         return new ZoekPersoonResponse(persoon);
     }
@@ -47,29 +55,8 @@ public class PersoonController {
     @ResponseStatus(HttpStatus.OK)
     public ZoekPersoonResponse getByBsn(@RequestParam String bsn) {
         final Burgerservicenummer burgerservicenummer = new Burgerservicenummer(bsn);
-        final NatuurlijkPersoon persoon = zoekPersoonService.findByBsn(burgerservicenummer).orElseThrow(() -> new PersoonNietGevondenException(burgerservicenummer));
+        final NatuurlijkPersoon persoon = zoekPersoonService.findByBsn(burgerservicenummer);
 
         return new ZoekPersoonResponse(persoon);
     }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public void POST(@Valid @RequestBody RegistreerPersoonRequest request) {
-        final Strafrechtketennummer strafrechtketennummer = new Strafrechtketennummer(request.skn());
-        final Burgerservicenummer burgerservicenummer = new Burgerservicenummer(request.bsn());
-
-        registreerPersoonService.registreer(strafrechtketennummer, burgerservicenummer);
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
-    public void handleIllegalArgumentException(IllegalArgumentException exception) {}
-
-    @ExceptionHandler({SknBestaatAlException.class, BsnBestaatAlException.class})
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public void handleDuplicateDataException() {}
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public void handlePersoonNietGevondenException(PersoonNietGevondenException exception) {}
 }
