@@ -34,7 +34,7 @@ class NatuurlijkPersoonTest {
     @Test
     @DisplayName("Twee personen met hetzelfde SKN moeten gelijk zijn (identiteit), ongeacht ander BSN")
     void shouldBeEqualWhenSknIsTheSame() {
-        final Burgerservicenummer geldigBsn2 = new Burgerservicenummer("999999999");
+        final Burgerservicenummer geldigBsn2 = new Burgerservicenummer("111111110");
 
         NatuurlijkPersoon persoon1 = new NatuurlijkPersoon(geldigSkn, geldigBsn);
         NatuurlijkPersoon persoon2 = new NatuurlijkPersoon(geldigSkn, geldigBsn2);

@@ -1,0 +1,47 @@
+run-name: ${{ github.actor }} is running the pipeline
+on: [push, pull_request]
+jobs:
+  backend-job:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      - name: Code ophalen
+        uses: actions/checkout@v7
+
+      - name: Java runtime inrichten
+        uses: actions/setup-java@v6
+        with:
+          distribution: "temurin"
+          java-version: "21"
+          cache: "maven"
+
+      - name: Tests draaien
+        run: |
+          ./mvnw clean verify
+
+  frontend-job:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Code ophalen
+        uses: actions/checkout@v7
+
+      - name: Node.js runtime inrichten
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: "frontend/package-lock.json"
+
+      - name: Installeer dependencies
+        run: |
+          npm ci
+
+      - name: Tests draaien
+        run: |
+          npm run test:ci
+          npm run build
