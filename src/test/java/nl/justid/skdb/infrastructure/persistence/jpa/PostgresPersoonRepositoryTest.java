@@ -40,7 +40,7 @@ class PostgresPersoonRepositoryTest {
     @Test
     @DisplayName("Mag geen twee instanties van NatuurlijkPersoon met hetzelfde SKN opslaan.")
     void shouldThrowIfSknIsTheSame() {
-        final Burgerservicenummer bsn2 = new Burgerservicenummer("123456783");
+        final Burgerservicenummer bsn2 = new Burgerservicenummer("849770786");
         final NatuurlijkPersoon persoon1 = new NatuurlijkPersoon(skn, bsn);
         final NatuurlijkPersoon persoon2 = new NatuurlijkPersoon(skn, bsn2);
 
